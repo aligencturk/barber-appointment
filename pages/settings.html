@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayarlar - BarberApp</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- Services -->
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/notification.service.js"></script>
+    <script src="../js/services/activity.service.js"></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item active" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Ayarlar</h1>
+                    <p>Sistem ayarları ve bildirim yönetimi</p>
+                </div>
+            </header>
+
+            <!-- Bildirim Gönderme Bölümü -->
+            <section class="notification-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Bildirim Gönder</h2>
+                        <p>Berber ve müşterilere bildirim gönder</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="notificationTitle">Bildirim Başlığı</label>
+                            <input type="text" id="notificationTitle" class="form-control" placeholder="Bildirim başlığını girin">
+                        </div>
+                        <div class="form-group">
+                            <label for="notificationMessage">Bildirim Mesajı</label>
+                            <textarea id="notificationMessage" class="form-control" rows="4" placeholder="Bildirim mesajını girin"></textarea>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="sendNotification('barbers')" class="btn btn-primary">
+                                <i class="fas fa-user-tie"></i>
+                                Berberlere Gönder
+                            </button>
+                            <button onclick="sendNotification('customers')" class="btn btn-success">
+                                <i class="fas fa-users"></i>
+                                Müşterilere Gönder
+                            </button>
+                            <button onclick="sendNotification('all')" class="btn btn-info">
+                                <i class="fas fa-globe"></i>
+                                Herkese Gönder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Diğer Ayarlar -->
+            <section class="settings-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Genel Ayarlar</h2>
+                        <p>Sistem genel ayarları</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Buraya diğer ayarlar eklenebilir -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Bildirim gönderme fonksiyonu
+        async function sendNotification(target) {
+            try {
+                const title = document.getElementById('notificationTitle').value.trim();
+                const message = document.getElementById('notificationMessage').value.trim();
+
+                if (!title || !message) {
+                    showToast('Lütfen başlık ve mesaj alanlarını doldurun', 'error');
+                    return;
+                }
+
+                await window.notificationService.sendNotification(target, title, message);
+                showToast('Bildirim başarıyla gönderildi', 'success');
+
+                // Formu temizle
+                document.getElementById('notificationTitle').value = '';
+                document.getElementById('notificationMessage').value = '';
+
+            } catch (error) {
+                console.error('Bildirim gönderilirken hata:', error);
+                showToast('Bildirim gönderilemedi', 'error');
+            }
+        }
+
+        // Toast mesajı göster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Çıkış yap
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = '../admin/pages/login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+    </script>
+
+    <style>
+        /* Notification Section */
+        .notification-section,
+        .settings-section {
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #2d3436;
+        }
+
+        .card-header p {
+            margin: 0.5rem 0 0;
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2d3436;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #dfe6e9;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: #2d3436;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #74b9ff;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            min-width: 180px;
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .btn-info {
+            background: #00cec9;
+            color: #fff;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toast.success {
+            background: #2ecc71;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html> 

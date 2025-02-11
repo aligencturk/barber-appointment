@@ -1,0 +1,44 @@
+{
+    "relatedFiles": {
+        "components": {
+            "patterns": [
+                "components/**/*.html",
+                "components/**/*.css",
+                "components/**/*.js"
+            ]
+        },
+        "button": {
+            "patterns": [
+                "components/Button/*"
+            ]
+        },
+        "navbar": {
+            "patterns": [
+                "components/Navbar/*"
+            ]
+        }
+    },
+    "preserveRules": {
+        "css": {
+            "selectors": [
+                ".existing-class",
+                "#existing-id"
+            ],
+            "files": [
+                "components/**/*.css"
+            ]
+        }
+    },
+    "designChanges": {
+        "mode": "manual",
+        "allowedCommands": [
+            "/design",
+            "/style",
+            "/update-design"
+        ]
+    },
+    "aiCompletions": {
+        "enabled": true,
+        "language": "tr"
+    }
+} 

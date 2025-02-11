@@ -1,0 +1,62 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Admin kontrolü
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'admin@berberotomasyon.com';
+    }
+    
+    // Berber kontrolü
+    function isBarber() {
+      return request.auth != null;
+    }
+    
+    // Dosya boyutu kontrolü (max 5MB)
+    function isValidSize() {
+      return request.resource.size <= 5 * 1024 * 1024;
+    }
+    
+    // Resim dosyası kontrolü
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Berber fotoğrafları
+    match /barber_photos/{userId} {
+      allow read: if true;
+      allow create: if isBarber() && 
+                   request.auth.uid == userId && 
+                   isValidSize() && 
+                   isImage();
+      allow update: if isBarber() && 
+                   request.auth.uid == userId && 
+                   isValidSize() && 
+                   isImage();
+      allow delete: if isBarber() && request.auth.uid == userId || isAdmin();
+    }
+    
+    // Hizmet fotoğrafları
+    match /service_photos/{photoId} {
+      allow read: if true;
+      allow create: if isBarber() && isValidSize() && isImage();
+      allow update: if isBarber() && isValidSize() && isImage();
+      allow delete: if isBarber() || isAdmin();
+    }
+    
+    // Profil resimleri
+    match /profile_images/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null && 
+                   request.auth.uid == userId && 
+                   isValidSize() && 
+                   isImage();
+      allow update: if request.auth != null && 
+                   request.auth.uid == userId && 
+                   isValidSize() && 
+                   isImage();
+      allow delete: if request.auth != null && 
+                   request.auth.uid == userId || 
+                   isAdmin();
+    }
+  }
+} 

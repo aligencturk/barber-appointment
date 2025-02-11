@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim - BarberApp</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-cut"></i>
+                BarberApp
+            </a>
+
+            <!-- Ana Menü -->
+            <nav class="nav-menu">
+                <a href="new-appointment.html" class="nav-link">
+                    <i class="fas fa-calendar-plus"></i>
+                    Yeni Randevu
+                </a>
+                <a href="appointments.html" class="nav-link">
+                    <i class="fas fa-history"></i>
+                    Randevu Geçmişi
+                </a>
+                <a href="favorites.html" class="nav-link">
+                    <i class="fas fa-heart"></i>
+                    Favorilerim
+                </a>
+                <a href="#" onclick="logout()" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış Yap
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h1>Profil Bilgilerim</h1>
+            </div>
+            <div class="profile-content">
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="fullName">Ad Soyad</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefon</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-posta</label>
+                        <input type="email" id="email" name="email" required readonly>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Değişiklikleri Kaydet
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config ve Servisler -->
+    <script src="../js/config/firebase.js"></script>
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/settings.service.js"></script>
+    <script src="js/maintenance.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/customer/profile.js"></script>
+</body>
+</html> 

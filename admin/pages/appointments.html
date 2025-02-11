@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevular - Admin Paneli</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/appointments.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item active" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Randevu Yönetimi</h1>
+                    <p>Randevuları görüntüle ve yönet</p>
+                </div>
+                <div class="header-actions">
+                    <div class="admin-info">
+                        <span class="admin-name">Admin</span>
+                        <span class="admin-email">admin@berberotomasyon.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Appointments Container -->
+            <div class="appointments-container">
+                <!-- Filters -->
+                <div class="filters-card">
+                    <div class="filter-group">
+                        <div class="date-navigation">
+                            <button class="btn btn-icon" onclick="changeDate('prev')">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="date-input-wrapper">
+                                <input type="date" id="dateFilter" class="form-control">
+                                
+                            </div>
+                            <button class="btn btn-icon" onclick="changeDate('next')">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <select id="statusFilter" class="form-control">
+                            <option value="all">Tüm Durumlar</option>
+                            <option value="pending">Bekleyen</option>
+                            <option value="confirmed">Onaylanan</option>
+                            <option value="completed">Tamamlanan</option>
+                            <option value="cancelled">İptal Edilen</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="filterAppointments()">
+                            <i class="fas fa-filter"></i>
+                            Filtrele
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-sync"></i>
+                            Sıfırla
+                        </button>
+                    </div>
+                    <div class="appointments-summary">
+                        <div class="summary-item">
+                            <i class="fas fa-clock text-warning"></i>
+                            <span>Bekleyen: <strong id="pendingCount">0</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-check text-primary"></i>
+                            <span>Onaylanan: <strong id="confirmedCount">0</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-check-double text-success"></i>
+                            <span>Tamamlanan: <strong id="completedCount">0</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-times text-danger"></i>
+                            <span>İptal: <strong id="cancelledCount">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments List -->
+                <div class="appointments-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Randevular yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    if (window.firebase && window.auth && window.db) {
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // Randevuları yükle
+        async function loadAppointments() {
+            const appointmentsList = document.querySelector('.appointments-list');
+            const date = document.getElementById('dateFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            try {
+                appointmentsList.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Randevular yükleniyor...</p>
+                    </div>
+                `;
+
+                let query = window.db.collection('appointments');
+                
+                // Tarih filtresi
+                if (date) {
+                    query = query.where('date', '==', date);
+                }
+                
+                // Durum filtresi
+                if (status !== 'all') {
+                    query = query.where('status', '==', status);
+                }
+
+                // Tarihe göre sırala
+                query = query.orderBy('date', 'desc');
+
+                console.log('Randevular yükleniyor...'); // Debug için
+                const snapshot = await query.get();
+                console.log('Bulunan randevu sayısı:', snapshot.size); // Debug için
+
+                if (snapshot.empty) {
+                    appointmentsList.innerHTML = `
+                        <div class="no-data">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>Randevu bulunamadı</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const appointment = doc.data();
+                    console.log('Randevu detayı:', appointment); // Debug için
+                    
+                    html += `
+                        <div class="appointment-card ${appointment.status}">
+                            <div class="appointment-time">
+                                <i class="fas fa-calendar"></i>
+                                ${appointment.date} ${appointment.time}
+                            </div>
+                            <div class="appointment-info">
+                                <div class="customer-info">
+                                    <h4>
+                                        <i class="fas fa-user"></i>
+                                        ${appointment.customer?.name || 'İsimsiz Müşteri'}
+                                    </h4>
+                                    <p>
+                                        <i class="fas fa-phone"></i>
+                                        ${appointment.customer?.phone || 'Telefon yok'}
+                                    </p>
+                                </div>
+                                <div class="barber-info">
+                                    <p>
+                                        <i class="fas fa-user-tie"></i>
+                                        Berber: ${appointment.barberId || 'Berber bilgisi yok'}
+                                    </p>
+                                </div>
+                                <div class="services-list">
+                                    <h5>
+                                        <i class="fas fa-cut"></i>
+                                        Seçilen Hizmetler
+                                    </h5>
+                                    <div class="services">
+                                        ${appointment.services?.map(service => `
+                                            <span class="service-tag">
+                                                ${service.name}
+                                                <small>${service.duration} dk</small>
+                                            </span>
+                                        `).join('') || 'Hizmet seçilmemiş'}
+                                    </div>
+                                </div>
+                                ${appointment.notes ? `
+                                    <div class="customer-notes">
+                                        <i class="fas fa-sticky-note"></i>
+                                        <p>${appointment.notes}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="appointment-status">
+                                <span class="status-badge">${getStatusText(appointment.status)}</span>
+                            </div>
+                            <div class="appointment-actions">
+                                <div class="status-dropdown">
+                                    <select class="form-control" onchange="updateStatus('${doc.id}', this.value)">
+                                        <option value="pending" ${appointment.status === 'pending' ? 'selected' : ''}>Bekliyor</option>
+                                        <option value="confirmed" ${appointment.status === 'confirmed' ? 'selected' : ''}>Onayla</option>
+                                        <option value="completed" ${appointment.status === 'completed' ? 'selected' : ''}>Tamamla</option>
+                                        <option value="cancelled" ${appointment.status === 'cancelled' ? 'selected' : ''}>İptal Et</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-icon" onclick="deleteAppointment('${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                appointmentsList.innerHTML = html;
+                updateStats(snapshot);
+            } catch (error) {
+                console.error('Randevular yüklenirken hata:', error);
+                appointmentsList.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Randevular yüklenirken bir hata oluştu</p>
+                    </div>
+                `;
+                showToast('Randevular yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Durum metni
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Bekliyor',
+                'confirmed': 'Onaylandı',
+                'completed': 'Tamamlandı',
+                'cancelled': 'İptal Edildi'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Randevu durumunu güncelle
+        async function updateStatus(id, newStatus) {
+            try {
+                await window.db.collection('appointments').doc(id).update({
+                    status: newStatus,
+                    updatedAt: new Date()
+                });
+                
+                showToast('Randevu durumu güncellendi', 'success');
+                await loadAppointments();
+            } catch (error) {
+                console.error('Durum güncellenirken hata:', error);
+                showToast('Durum güncellenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Randevu sil
+        async function deleteAppointment(id) {
+            if (!confirm('Bu randevuyu silmek istediğinizden emin misiniz?')) return;
+
+            try {
+                await window.db.collection('appointments').doc(id).delete();
+                showToast('Randevu başarıyla silindi', 'success');
+                await loadAppointments();
+            } catch (error) {
+                console.error('Randevu silinirken hata:', error);
+                showToast('Randevu silinirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Filtreleme
+        function filterAppointments() {
+            loadAppointments();
+        }
+
+        // Toast mesajı
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await checkFirebaseServices();
+                document.getElementById('dateFilter').valueAsDate = new Date();
+                await loadAppointments();
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Sayfa yüklenirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+
+        // Tarih değiştirme fonksiyonu
+        function changeDate(direction) {
+            const dateInput = document.getElementById('dateFilter');
+            const currentDate = new Date(dateInput.value || new Date());
+            
+            if (direction === 'prev') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            dateInput.valueAsDate = currentDate;
+            filterAppointments();
+        }
+
+        // Filtreleri sıfırla
+        function resetFilters() {
+            document.getElementById('dateFilter').valueAsDate = new Date();
+            document.getElementById('statusFilter').value = 'all';
+            filterAppointments();
+        }
+
+        // İstatistikleri güncelle
+        function updateStats(appointments) {
+            const stats = {
+                pending: 0,
+                confirmed: 0,
+                completed: 0,
+                cancelled: 0
+            };
+
+            appointments.forEach(doc => {
+                const status = doc.data().status;
+                if (stats.hasOwnProperty(status)) {
+                    stats[status]++;
+                }
+            });
+
+            document.getElementById('pendingCount').textContent = stats.pending;
+            document.getElementById('confirmedCount').textContent = stats.confirmed;
+            document.getElementById('completedCount').textContent = stats.completed;
+            document.getElementById('cancelledCount').textContent = stats.cancelled;
+        }
+    </script>
+
+    <style>
+        .appointments-container {
+            padding: 1rem 0;
+        }
+
+        .filters-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .appointments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .appointment-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .appointment-time {
+            min-width: 150px;
+            font-weight: 500;
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .appointment-info h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        .appointment-info p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .appointment-info i {
+            width: 20px;
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .appointment-card.pending .status-badge {
+            background: rgba(241, 196, 15, 0.1);
+            color: var(--warning-color);
+        }
+
+        .appointment-card.confirmed .status-badge {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+        }
+
+        .appointment-card.completed .status-badge {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .appointment-card.cancelled .status-badge {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: #f8f9fa;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .date-input-wrapper i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .appointments-summary {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-item i {
+            font-size: 1.2rem;
+        }
+
+        .text-warning { color: var(--warning-color); }
+        .text-primary { color: var(--primary-color); }
+        .text-success { color: var(--success-color); }
+        .text-danger { color: var(--danger-color); }
+
+        /* Status Dropdown Styles */
+        .status-dropdown {
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .status-dropdown select {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .status-dropdown select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .status-dropdown select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+        }
+
+        /* Status specific colors */
+        .status-dropdown select option[value="pending"] {
+            color: var(--warning-color);
+        }
+
+        .status-dropdown select option[value="confirmed"] {
+            color: var(--primary-color);
+        }
+
+        .status-dropdown select option[value="completed"] {
+            color: var(--success-color);
+        }
+
+        .status-dropdown select option[value="cancelled"] {
+            color: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .filter-group {
+                flex-direction: column;
+            }
+            
+            .appointment-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .appointment-time {
+                min-width: auto;
+            }
+            
+            .appointment-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .appointments-summary {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .status-dropdown select {
+                min-width: 100px;
+                padding: 0.4rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</body>
+</html> 

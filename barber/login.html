@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berber Girişi - BarberApp</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="./index.html" class="logo">
+                    <i class="fas fa-cut"></i>
+                    BarberApp
+                </a>
+                <h1>Berber Girişi</h1>
+                <p>İşletme hesabınıza giriş yaparak randevularınızı yönetin.</p>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email">E-posta</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group remember-forgot">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Beni hatırla</label>
+                    </div>
+                    <a href="reset-password.html" class="forgot-password">
+                        Şifremi unuttum
+                    </a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>İşletmenizi eklemek ister misiniz?</p>
+                <a href="register.html" class="btn btn-outline btn-block">
+                    <i class="fas fa-store"></i>
+                    İşletme Kaydı Oluştur
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div class="toast" id="toast"></div>
+
+    <!-- App Scripts -->
+    <script>
+        // Berber kontrolü fonksiyonu
+        async function checkBarber(user) {
+            if (!user) return false;
+            try {
+                const userDoc = await window.db.collection('barbers').doc(user.uid).get();
+                return userDoc.exists;
+            } catch (error) {
+                console.error('Berber kontrolü hatası:', error);
+                return false;
+            }
+        }
+
+        // Firebase'in yüklendiğinden emin ol
+        window.addEventListener('load', () => {
+            if (!window.auth) {
+                showToast('Sistem başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.', 'error');
+                return;
+            }
+        });
+
+        let isAuthCheckComplete = false;
+        let isLoginInProgress = false;
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mevcut oturumu kontrol et
+            if (window.auth) {
+                const unsubscribe = window.auth.onAuthStateChanged(async (user) => {
+                    if (!isAuthCheckComplete) {
+                        isAuthCheckComplete = true;
+                        const isBarber = await checkBarber(user);
+                        if (isBarber && !isLoginInProgress) {
+                            window.location.href = './dashboard.html';
+                        }
+                    }
+                    unsubscribe();
+                });
+            }
+        });
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isLoginInProgress) return;
+            isLoginInProgress = true;
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            const loginBtn = document.querySelector('button[type="submit"]');
+            const originalBtnText = loginBtn.innerHTML;
+            
+            try {
+                // Butonu devre dışı bırak
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Giriş yapılıyor...';
+                
+                // Persistence ayarı
+                await window.auth.setPersistence(
+                    remember 
+                        ? firebase.auth.Auth.Persistence.LOCAL 
+                        : firebase.auth.Auth.Persistence.SESSION
+                );
+                
+                // Giriş yap
+                const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Berber kontrolü
+                const isBarber = await checkBarber(user);
+                if (!isBarber) {
+                    await window.auth.signOut();
+                    throw new Error('Bu hesap berber hesabı değil');
+                }
+                
+                // Başarılı giriş sonrası dashboard'a yönlendir
+                showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                setTimeout(() => {
+                    window.location.href = './dashboard.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Giriş hatası:', error);
+                let errorMessage = 'Giriş yapılırken bir hata oluştu';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Bu hesap devre dışı bırakılmış';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = 'Bu e-posta adresi ile kayıtlı hesap bulunamadı';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Hatalı şifre';
+                        break;
+                }
+                
+                showToast(errorMessage, 'error');
+                
+                // Butonu tekrar aktif et
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalBtnText;
+            } finally {
+                isLoginInProgress = false;
+            }
+        });
+
+        // Şifre göster/gizle
+        document.querySelector('.toggle-password').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Toast mesajı göster
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 

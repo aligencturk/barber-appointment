@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Temel fonksiyonlar
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Admin kontrolü
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email == 'admin@berberotomasyon.com';
+    }
+    
+    // Berber ve müşteri kontrolleri
+    function isBarber() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/barbers/$(request.auth.uid));
+    }
+    
+    function isCustomer() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/customers/$(request.auth.uid));
+    }
+
+    // Kullanıcı tipini kontrol et
+    function getUserType() {
+      return isBarber() ? 'barbers' : (isCustomer() ? 'customers' : 'unknown');
+    }
+
+    // Settings koleksiyonu
+    match /settings/{document} {
+      allow read: if true; // Herkes okuyabilir
+      allow write: if isAdmin(); // Sadece admin yazabilir
+    }
+    
+    // Admin koleksiyonu
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Berberler koleksiyonu
+    match /barbers/{barberId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isOwner(barberId) || isAdmin();
+      allow delete: if isAdmin();
+      
+      // Berber hizmetleri alt koleksiyonu
+      match /services/{serviceId} {
+        allow read: if true;
+        allow write: if isOwner(barberId) || isAdmin();
+      }
+    }
+    
+    // Müşteriler koleksiyonu
+    match /customers/{customerId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isOwner(customerId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Randevular koleksiyonu
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        (resource.data.barberId == request.auth.uid) || 
+        (resource.data.customerId == request.auth.uid) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin() || 
+        (resource.data.customerId == request.auth.uid && resource.data.status == 'pending') ||
+        (resource.data.barberId == request.auth.uid && resource.data.status == 'pending');
+    }
+    
+    // Hizmetler koleksiyonu
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create: if isBarber();
+      allow update, delete: if isBarber() && resource.data.barberId == request.auth.uid || isAdmin();
+    }
+    
+    // Değerlendirmeler koleksiyonu
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isCustomer();
+      allow update, delete: if isOwner(resource.data.customerId) || isAdmin();
+    }
+
+    // Bildirimler koleksiyonu
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.target == getUserType() ||
+        resource.data.target == 'all'
+      );
+      
+      allow create: if isAuthenticated();
+      
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.target == getUserType() ||
+        resource.data.target == 'all'
+      ) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt']);
+      
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+} 

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hizmetler - Admin Paneli</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/services.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item active" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Hizmet Yönetimi</h1>
+                    <p>Berber hizmetlerini görüntüle ve yönet</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddServiceModal()">
+                        <i class="fas fa-plus"></i>
+                        Yeni Hizmet Ekle
+                    </button>
+                </div>
+            </header>
+
+            <!-- Services Grid -->
+            <div class="services-container">
+                <!-- Search and Filter -->
+                <div class="card mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="search-box">
+                            <input type="text" class="form-control" id="searchService" placeholder="Hizmet ara...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="filter-box">
+                            <select class="form-control" id="serviceFilter">
+                                <option value="all">Tüm Hizmetler</option>
+                                <option value="active">Aktif Hizmetler</option>
+                                <option value="inactive">Pasif Hizmetler</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="services-grid" id="servicesGrid">
+                    <!-- Hizmetler buraya dinamik olarak eklenecek -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Hizmetler yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Service Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Yeni Hizmet Ekle</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="serviceForm">
+                    <input type="hidden" id="serviceId">
+                    <div class="form-group">
+                        <label for="serviceName">Hizmet Adı</label>
+                        <input type="text" id="serviceName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceDescription">Açıklama</label>
+                        <textarea id="serviceDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="servicePrice">Fiyat (₺)</label>
+                        <input type="number" id="servicePrice" class="form-control" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceDuration">Süre (Dakika)</label>
+                        <input type="number" id="serviceDuration" class="form-control" min="5" step="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="d-flex align-items-center gap-2">
+                            <input type="checkbox" id="serviceStatus">
+                            <span>Aktif</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                            <i class="fas fa-times"></i>
+                            İptal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    console.log(`Firebase servisleri kontrol ediliyor... (${attempts}/${maxAttempts})`);
+
+                    if (window.firebase && window.auth && window.db) {
+                        console.log('Firebase servisleri başarıyla yüklendi');
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await checkFirebaseServices();
+                await loadServices();
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Sayfa yüklenirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Hizmetleri yükle
+        async function loadServices() {
+            const servicesGrid = document.getElementById('servicesGrid');
+            servicesGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Hizmetler yükleniyor...</p></div>';
+
+            try {
+                const snapshot = await window.db.collection('services').get();
+                
+                if (snapshot.empty) {
+                    servicesGrid.innerHTML = '<div class="no-data">Henüz hizmet bulunmuyor</div>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const service = doc.data();
+                    html += `
+                        <div class="service-card ${service.status ? 'active' : 'inactive'}">
+                            <div class="service-header">
+                                <h3>${service.name}</h3>
+                                <div class="service-actions">
+                                    <button class="btn btn-icon" onclick="editService('${doc.id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-icon" onclick="deleteService('${doc.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="service-body">
+                                <p class="service-description">${service.description || 'Açıklama yok'}</p>
+                                <div class="service-info">
+                                    <span class="price">₺${service.price}</span>
+                                    <span class="duration">${service.duration} dk</span>
+                                </div>
+                                <div class="service-status">
+                                    <span class="status-badge ${service.status ? 'active' : 'inactive'}">
+                                        ${service.status ? 'Aktif' : 'Pasif'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                servicesGrid.innerHTML = html;
+            } catch (error) {
+                console.error('Hizmetler yüklenirken hata:', error);
+                showToast('Hizmetler yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Modal işlemleri
+        function showAddServiceModal() {
+            document.getElementById('modalTitle').textContent = 'Yeni Hizmet Ekle';
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('serviceModal').style.display = 'none';
+        }
+
+        // Form submit
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const serviceId = document.getElementById('serviceId').value;
+            const data = {
+                name: document.getElementById('serviceName').value,
+                description: document.getElementById('serviceDescription').value,
+                price: parseFloat(document.getElementById('servicePrice').value),
+                duration: parseInt(document.getElementById('serviceDuration').value),
+                status: document.getElementById('serviceStatus').checked,
+                updatedAt: new Date()
+            };
+
+            try {
+                if (serviceId) {
+                    await window.db.collection('services').doc(serviceId).update(data);
+                    showToast('Hizmet başarıyla güncellendi', 'success');
+                } else {
+                    data.createdAt = new Date();
+                    await window.db.collection('services').add(data);
+                    showToast('Hizmet başarıyla eklendi', 'success');
+                }
+
+                closeModal();
+                await loadServices();
+            } catch (error) {
+                console.error('Hizmet kaydedilirken hata:', error);
+                showToast('Hizmet kaydedilirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Toast mesajı
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+
+        // Hizmet düzenle
+        async function editService(id) {
+            try {
+                const doc = await window.db.collection('services').doc(id).get();
+                if (!doc.exists) {
+                    showToast('Hizmet bulunamadı', 'error');
+                    return;
+                }
+
+                const service = doc.data();
+                document.getElementById('modalTitle').textContent = 'Hizmet Düzenle';
+                document.getElementById('serviceId').value = id;
+                document.getElementById('serviceName').value = service.name;
+                document.getElementById('serviceDescription').value = service.description || '';
+                document.getElementById('servicePrice').value = service.price;
+                document.getElementById('serviceDuration').value = service.duration;
+                document.getElementById('serviceStatus').checked = service.status;
+
+                document.getElementById('serviceModal').style.display = 'block';
+            } catch (error) {
+                console.error('Hizmet yüklenirken hata:', error);
+                showToast('Hizmet yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Hizmet sil
+        async function deleteService(id) {
+            if (!confirm('Bu hizmeti silmek istediğinizden emin misiniz?')) return;
+
+            try {
+                await window.db.collection('services').doc(id).delete();
+                showToast('Hizmet başarıyla silindi', 'success');
+                await loadServices();
+            } catch (error) {
+                console.error('Hizmet silinirken hata:', error);
+                showToast('Hizmet silinirken bir hata oluştu', 'error');
+            }
+        }
+    </script>
+
+    <style>
+        /* Services Grid */
+        .services-container {
+            padding: 1rem 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .service-card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .service-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: #f8f9fa;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .service-body {
+            padding: 1.25rem;
+        }
+
+        .service-description {
+            margin: 0 0 1rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .service-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .duration {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .service-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .status-badge.inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Filter Box */
+        .filter-box {
+            width: 200px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--white);
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* No Data */
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</body>
+</html> 

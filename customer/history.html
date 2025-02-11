@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevu Geçmişi - BarberApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/history.css">
+    <link rel="stylesheet" href="../css/review.css">
+</head>
+<body>
+    <div class="history-container">
+        <div class="history-header">
+            <h1>Randevu Geçmişi</h1>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Berber veya hizmet ara...">
+            </div>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-status="all">
+                <i class="fas fa-list"></i>
+                Tümü
+            </button>
+            <button class="filter-btn" data-status="pending">
+                <i class="fas fa-clock"></i>
+                Bekleyen
+            </button>
+            <button class="filter-btn" data-status="confirmed">
+                <i class="fas fa-check"></i>
+                Onaylanan
+            </button>
+            <button class="filter-btn" data-status="completed">
+                <i class="fas fa-check-double"></i>
+                Tamamlanan
+            </button>
+            <button class="filter-btn" data-status="cancelled">
+                <i class="fas fa-times"></i>
+                İptal Edilen
+            </button>
+        </div>
+
+        <div class="history-grid">
+            <!-- Randevular dinamik olarak buraya eklenecek -->
+        </div>
+
+        <div class="empty-state">
+            <i class="fas fa-calendar-xmark"></i>
+            <h2>Henüz randevunuz yok</h2>
+            <p>Yeni bir randevu almak için berberlerimize göz atın.</p>
+        </div>
+    </div>
+
+    <div class="modal">
+        <div class="modal-content">
+            <!-- Modal içeriği dinamik olarak eklenecek -->
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config ve Servisler -->
+    <script src="../js/config/firebase.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/settings.service.js"></script>
+    <script src="js/maintenance.js"></script>
+    
+    <!-- Custom JS -->
+    <script type="module" src="../js/customer/history.js"></script>
+</body>
+</html> 

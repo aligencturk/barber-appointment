@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bildirimler - BarberApp</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/notifications.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- Services -->
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/notification.service.js"></script>
+</head>
+<body>
+    <div class="barber-layout">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1>Bildirimler</h1>
+            </div>
+            <div class="header-actions">
+                <button id="refreshBtn" class="btn btn-icon" onclick="loadNotifications()">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Notifications List -->
+        <main class="notifications-container">
+            <div id="notificationsList" class="notifications-list">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Bildirimler yükleniyor...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Bildirimleri yükle
+        async function loadNotifications() {
+            try {
+                const notificationsList = document.getElementById('notificationsList');
+                notificationsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Bildirimler yükleniyor...</p></div>';
+
+                const notifications = await window.notificationService.getNotifications('barbers');
+
+                if (!notifications.length) {
+                    notificationsList.innerHTML = '<div class="empty-state">Henüz bildirim bulunmuyor</div>';
+                    return;
+                }
+
+                let html = '';
+                notifications.forEach(notification => {
+                    const date = notification.createdAt.toDate().toLocaleString('tr-TR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    html += `
+                        <div class="notification-item ${notification.status === 'unread' ? 'unread' : ''}" 
+                             onclick="markAsRead('${notification.id}')">
+                            <div class="notification-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h3 class="notification-title">${notification.title}</h3>
+                                <p class="notification-message">${notification.message}</p>
+                                <span class="notification-time">${date}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                notificationsList.innerHTML = html;
+
+            } catch (error) {
+                console.error('Bildirimler yüklenirken hata:', error);
+                showToast('Bildirimler yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Bildirimi okundu olarak işaretle
+        async function markAsRead(notificationId) {
+            try {
+                await window.notificationService.markAsRead(notificationId);
+                const notification = document.querySelector(`[onclick="markAsRead('${notificationId}')"]`);
+                if (notification) {
+                    notification.classList.remove('unread');
+                }
+            } catch (error) {
+                console.error('Bildirim durumu güncellenirken hata:', error);
+                showToast('Bildirim durumu güncellenemedi', 'error');
+            }
+        }
+
+        // Toast mesajı göster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', loadNotifications);
+    </script>
+
+    <style>
+        /* Layout */
+        .barber-layout {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2d3436;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: #f8f9fa;
+            color: #2d3436;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #e9ecef;
+            transform: rotate(180deg);
+        }
+
+        /* Notifications List */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notification-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .notification-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .notification-item.unread {
+            background: #e3f2fd;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            margin: 0;
+            font-size: 1rem;
+            color: #2d3436;
+        }
+
+        .notification-message {
+            margin: 0.5rem 0;
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        .notification-time {
+            display: block;
+            color: #b2bec3;
+            font-size: 0.8rem;
+        }
+
+        /* Loading & Empty State */
+        .loading,
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #636e72;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toast.success {
+            background: #2ecc71;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+    </style>
+</body>
+</html> 

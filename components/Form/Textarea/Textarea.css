@@ -1,0 +1,49 @@
+.textarea-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.textarea-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.textarea-wrapper textarea.form-control {
+    width: 100%;
+    min-height: 80px;
+    padding: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    resize: none;
+    overflow-y: hidden;
+    transition: height 0.2s ease;
+}
+
+.textarea-wrapper textarea.form-control::placeholder {
+    color: #718096;
+}
+
+.textarea-wrapper textarea.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .textarea-wrapper textarea.form-control {
+        background: var(--dark-bg-light);
+        border-color: var(--dark-border);
+        color: var(--dark-text);
+    }
+
+    .textarea-wrapper textarea.form-control:focus {
+        background: var(--dark-bg);
+        border-color: var(--primary-color);
+    }
+} 

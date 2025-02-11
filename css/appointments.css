@@ -1,0 +1,951 @@
+/* Header Styles */
+.header {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 64px;
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.header-left .logo {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-right .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link i {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
+    
+    .header-right .user-menu {
+        gap: 1rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem;
+    }
+    
+    .nav-link i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Temel Scroll Ayarları */
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Ana Container */
+.appointment-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-top: calc(64px + 2rem);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Section Styles */
+.appointment-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Özel Scrollbar Stilleri */
+.appointment-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.appointment-section::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: 4px;
+}
+
+.appointment-section::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.appointment-section::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Section Header */
+.section-header {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.section-title {
+    margin: 0;
+}
+
+.section-title h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0.5rem 0 0 0;
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    flex: 0 0 auto;
+    width: 300px;
+    margin: 0;
+}
+
+.search-box input {
+    width: 100%;
+    height: 42px;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-box i {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-box i:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .section-header {
+        position: relative;
+        padding: 1rem;
+    }
+
+    .section-title {
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-box {
+        width: 100%;
+        margin: 0;
+    }
+
+    .search-box input {
+        height: 38px;
+    }
+}
+
+/* Appointments Grid */
+.appointments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* Appointment Card */
+.appointment-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.appointment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--bg-light) 0%, #f8fafc 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.appointment-date,
+.appointment-time {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.appointment-date i,
+.appointment-time i {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.appointment-content {
+    padding: 1.5rem;
+}
+
+.barber-info {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.barber-image {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.barber-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.barber-details .address {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.barber-details .address i {
+    color: var(--secondary-color);
+    font-size: 1rem;
+}
+
+.services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.service-item:hover {
+    background: var(--bg-lighter);
+    transform: translateX(4px);
+}
+
+.service-name {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.service-duration {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.service-duration i {
+    color: var(--secondary-color);
+}
+
+.service-price {
+    color: var(--success-color);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.appointment-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    margin: 0 -1.5rem;
+    background: var(--bg-light);
+    border-top: 1px solid var(--border-color);
+}
+
+.total-duration {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.total-duration i {
+    color: var(--secondary-color);
+}
+
+.total-price {
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.appointment-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: white;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-cancel,
+.btn-reschedule {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2);
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+}
+
+.btn-cancel:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2);
+}
+
+.btn-reschedule {
+    background: linear-gradient(135deg, #2e86de 0%, #54a0ff 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(46, 134, 222, 0.2);
+}
+
+.btn-reschedule:hover {
+    background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(46, 134, 222, 0.3);
+}
+
+.btn-reschedule:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(46, 134, 222, 0.2);
+}
+
+.btn-cancel i,
+.btn-reschedule i {
+    font-size: 1.1rem;
+    margin-right: 0.25rem;
+}
+
+/* Loading and Error States */
+.loading,
+.empty-state,
+.error-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.loading {
+    color: var(--info-color);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.empty-state {
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--text-lighter);
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.empty-state .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.empty-state .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .appointment-container {
+        padding: 1rem;
+        padding-top: calc(56px + 1rem);
+        height: calc(100vh - 56px);
+    }
+
+    .appointment-section {
+        padding: 1rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        width: 100%;
+        text-align: center;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .search-box input {
+        padding: 0.75rem 2.75rem 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .search-box i {
+        right: 1rem;
+        font-size: 1rem;
+    }
+
+    .appointments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .appointment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .barber-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .barber-details .address {
+        justify-content: center;
+    }
+
+    .appointment-summary {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .appointment-footer {
+        flex-direction: column;
+    }
+}
+
+/* Appointments Section */
+.appointments-section {
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.appointments-section h3 {
+    color: #2d3436;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    padding: 0.5rem 0;
+}
+
+/* Appointments Grid */
+.appointments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Appointment Card */
+.appointment-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e1e8ed;
+}
+
+.appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Kart Başlığı */
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.appointment-time {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3436;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.appointment-time i {
+    color: #2e86de;
+}
+
+.appointment-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Durum Stilleri */
+.appointment-card.pending .appointment-status {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.appointment-card.confirmed .appointment-status {
+    background: #d4edda;
+    color: #155724;
+}
+
+.appointment-card.completed .appointment-status {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.appointment-card.cancelled .appointment-status {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Kart Detayları */
+.appointment-details {
+    padding: 1rem;
+}
+
+.barber-info, .appointment-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    color: #2d3436;
+}
+
+.barber-info i, .appointment-date i {
+    color: #2e86de;
+    width: 20px;
+}
+
+/* Hizmet Etiketleri */
+.services-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.service-tag {
+    background: #e8f4fd;
+    color: #2e86de;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Müşteri Notları */
+.customer-notes {
+    background: #f8f9fa;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin: 0.8rem 0;
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.customer-notes i {
+    color: #2e86de;
+    margin-top: 0.2rem;
+}
+
+/* Toplam Bilgileri */
+.appointment-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e1e8ed;
+}
+
+.duration, .price {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #2d3436;
+}
+
+.duration i, .price i {
+    color: #2e86de;
+}
+
+/* Butonlar */
+.appointment-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e1e8ed;
+}
+
+.cancel-btn, .reschedule-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn {
+    background: #fff;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.cancel-btn:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.reschedule-btn {
+    background: #2e86de;
+    color: #fff;
+}
+
+.reschedule-btn:hover {
+    background: #2779bd;
+}
+
+/* Boş Durum */
+.no-appointments {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-appointments i {
+    font-size: 3rem;
+    color: #b2bec3;
+    margin-bottom: 1rem;
+}
+
+.no-appointments p {
+    color: #636e72;
+    margin-bottom: 1.5rem;
+}
+
+.new-appointment-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #2e86de;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.new-appointment-btn:hover {
+    background: #2779bd;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .appointments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .appointment-header {
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: flex-start;
+    }
+
+    .appointment-actions {
+        flex-direction: column;
+    }
+
+    .appointment-total {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+}
+
+/* Arama Kutusu */
+.search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #2e86de;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b2bec3;
+}
+
+/* Yükleme ve Hata Durumları */
+.loading, .error-message {
+    text-align: center;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-message i {
+    color: #e74c3c;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.error-message p {
+    color: #2d3436;
+    margin-bottom: 0.5rem;
+}
+
+.error-message small {
+    color: #636e72;
+}
+
+/* Müşteri Bilgileri */
+.customer-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.customer-name, .customer-phone {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2d3436;
+    font-weight: 500;
+    padding: 0.3rem 0;
+}
+
+.customer-name i, .customer-phone i {
+    color: #2e86de;
+    width: 20px;
+    text-align: center;
+}
+
+.customer-phone {
+    color: #636e72;
+    font-size: 0.9rem;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .header {
+        height: 56px;
+    }
+
+    .section-header {
+        padding: 1rem;
+    }
+
+    .appointments-section h3 {
+        padding: 0.75rem;
+    }
+
+    .appointment-container {
+        padding: 1rem;
+        padding-top: calc(56px + 1rem);
+    }
+
+    .section-title h2 {
+        font-size: 1.5rem;
+    }
+} 

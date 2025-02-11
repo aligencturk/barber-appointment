@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Component</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="Card.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Card Örnekleri</h2>
+        
+        <div class="example-section">
+            <h3>Temel Kartlar</h3>
+            <div class="cards-grid">
+                <!-- Basit Kart -->
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Basit Kart</h3>
+                    </div>
+                    <div class="card-content">
+                        Bu basit bir kart örneğidir. İçeriği tamamen özelleştirilebilir.
+                    </div>
+                </div>
+
+                <!-- Rozetli Kart -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Rozetli Kart</h3>
+                        <span class="badge badge-success">
+                            <i class="fas fa-check"></i>
+                            Aktif
+                        </span>
+                    </div>
+                    <div class="card-content">
+                        Bu kart bir rozet içerir ve primary tipindedir.
+                    </div>
+                </div>
+
+                <!-- Alt Başlıklı Kart -->
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">Alt Başlıklı Kart</h3>
+                    </div>
+                    <div class="card-subtitle">
+                        Bu bir alt başlık örneğidir
+                    </div>
+                    <div class="card-content">
+                        Alt başlık içeren bir kart örneği.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h3>Aksiyonlu Kartlar</h3>
+            <div class="cards-grid">
+                <!-- Butonlu Kart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Butonlu Kart</h3>
+                    </div>
+                    <div class="card-content">
+                        Bu kart alt kısmında aksiyon butonları içerir.
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-edit"></i>
+                            Düzenle
+                        </button>
+                        <button class="btn btn-danger">
+                            <i class="fas fa-trash"></i>
+                            Sil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer'lı Kart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Footer'lı Kart</h3>
+                    </div>
+                    <div class="card-content">
+                        Bu kart bir footer bölümü içerir.
+                    </div>
+                    <div class="card-footer">
+                        Son güncelleme: 5 dakika önce
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Card from './Card.js';
+
+        // JavaScript ile kart oluşturma örneği
+        const container = document.querySelector('.container');
+
+        // Randevu kartı örneği
+        const appointmentCard = new Card({
+            title: 'Randevu Detayları',
+            type: 'primary',
+            badge: {
+                type: 'success',
+                icon: 'fas fa-clock',
+                text: 'Onaylandı'
+            },
+            content: `
+                <div class="appointment-details">
+                    <div class="detail-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>12 Mart 2024, 14:30</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-user"></i>
+                        <span>Ahmet Yılmaz</span>
+                    </div>
+                </div>
+            `,
+            actions: [
+                {
+                    text: 'Düzenle',
+                    type: 'primary',
+                    icon: 'fas fa-edit',
+                    onClick: () => alert('Düzenle tıklandı!')
+                },
+                {
+                    text: 'İptal Et',
+                    type: 'danger',
+                    icon: 'fas fa-times',
+                    onClick: () => alert('İptal tıklandı!')
+                }
+            ]
+        });
+
+        container.appendChild(appointmentCard.render());
+    </script>
+
+    <style>
+        .example-section {
+            margin: 2rem 0;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .appointment-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-item i {
+            color: var(--primary-color);
+            width: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html> 

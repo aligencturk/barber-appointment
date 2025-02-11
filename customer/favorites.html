@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorilerim - BarberApp</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/favorites.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-left">
+                <a href="/customer/dashboard.html" class="logo">
+                    <i class="fas fa-cut"></i>
+                    BarberApp
+                </a>
+            </div>
+
+            <div class="header-right">
+                <div class="user-menu">
+                    <a href="/customer/new-appointment.html" class="nav-link">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Yeni Randevu</span>
+                    </a>
+                    <a href="/customer/appointments.html" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Randevularım</span>
+                    </a>
+                    <a href="/customer/favorites.html" class="nav-link active">
+                        <i class="fas fa-heart"></i>
+                        <span>Favorilerim</span>
+                    </a>
+                    <a href="#" onclick="logout()" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Çıkış Yap</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container">
+        <div class="favorites-container">
+            <div class="favorites-header">
+                <h1>Favori Berberlerim (<span id="favoriteCount">0</span>)</h1>
+                
+                <!-- Arama ve Filtreler -->
+                <div class="search-filter-wrapper">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Berber ara...">
+                    </div>
+                    
+                    <div class="view-options">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+
+                    <select id="sortSelect" class="sort-select">
+                        <option value="rating">Puana Göre</option>
+                        <option value="name">İsme Göre</option>
+                        <option value="distance">Mesafeye Göre</option>
+                        <option value="added">Eklenme Tarihine Göre</option>
+                    </select>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">Tümü</button>
+                        <button class="filter-btn" data-filter="open">Açık</button>
+                        <button class="filter-btn" data-filter="rated">En İyi</button>
+                        <button class="filter-btn" data-filter="visited">Ziyaret Edilenler</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favoriler Grid -->
+            <div id="favoritesGrid" class="favorites-grid">
+                <!-- Favoriler buraya dinamik olarak eklenecek -->
+            </div>
+
+            <!-- Favori Yok Mesajı -->
+            <div class="favorites-empty" style="display: none;">
+                <i class="fas fa-heart-broken"></i>
+                <h3>Henüz favori berberiniz yok</h3>
+                <p>Beğendiğiniz berberleri favorilerinize ekleyerek daha kolay ulaşabilirsiniz.</p>
+                <a href="/customer/new-appointment.html" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Berber Ara
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Berber Detay Modal -->
+    <div id="barberDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="barber-info">
+                    <img id="detailBarberAvatar" src="../assets/default-avatar.png" alt="Berber">
+                    <div class="info-text">
+                        <h2 id="detailBarberName"></h2>
+                        <p id="detailBarberAddress"></p>
+                        <div class="rating">
+                            <div class="stars"></div>
+                            <span id="detailBarberRating"></span>
+                        </div>
+                        <div class="working-hours">
+                            <i class="fas fa-clock"></i>
+                            <span id="detailWorkingHours"></span>
+                            <span id="detailOpenStatus" class="status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span id="detailTotalAppointments">0</span>
+                        <label>Toplam Randevu</label>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span id="detailTotalCustomers">0</span>
+                        <label>Toplam Müşteri</label>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <span id="detailReviewCount">0</span>
+                        <label>Değerlendirme</label>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-award"></i>
+                        <span id="detailExperience">0</span>
+                        <label>Yıl Deneyim</label>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Hizmetler</h3>
+                    <div id="detailServices" class="services-grid"></div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Galeri</h3>
+                    <div id="detailGallery" class="gallery-grid"></div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Değerlendirmeler</h3>
+                    <div id="detailReviews" class="reviews-list"></div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="detailChatBtn" class="btn btn-secondary">
+                        <i class="fas fa-comments"></i>
+                        Mesaj Gönder
+                    </button>
+                    <button id="detailAppointmentBtn" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i>
+                        Randevu Al
+                    </button>
+                    <button id="detailRemoveFavoriteBtn" class="btn btn-danger">
+                        <i class="fas fa-heart-broken"></i>
+                        Favorilerden Çıkar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="../js/common.js"></script>
+    <script src="../js/customer/favorites.js"></script>
+</body>
+</html> 

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Paneli</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Genel Bakış</h1>
+                    <p>Sistem istatistikleri ve özet bilgiler</p>
+                </div>
+                <div class="header-actions">
+                    <div class="admin-info">
+                        <span class="admin-name">Admin</span>
+                        <span class="admin-email">admin@berberotomasyon.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value" id="totalCustomers">0</p>
+                        <p class="stat-label">Toplam Müşteri</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value" id="totalBarbers">0</p>
+                        <p class="stat-label">Toplam Berber</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value" id="totalAppointments">0</p>
+                        <p class="stat-label">Toplam Randevu</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value" id="totalRevenue">₺0</p>
+                        <p class="stat-label">Toplam Kazanç</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Summary -->
+            <div class="summary-section">
+                <div class="section-header">
+                    <h2>Randevu Durumu</h2>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-card pending">
+                        <div class="summary-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-info">
+                            <p class="summary-value" id="pendingAppointments">0</p>
+                            <p class="summary-label">Bekleyen</p>
+                        </div>
+                    </div>
+                    <div class="summary-card confirmed">
+                        <div class="summary-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="summary-info">
+                            <p class="summary-value" id="confirmedAppointments">0</p>
+                            <p class="summary-label">Onaylanan</p>
+                        </div>
+                    </div>
+                    <div class="summary-card completed">
+                        <div class="summary-icon">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <div class="summary-info">
+                            <p class="summary-value" id="completedAppointments">0</p>
+                            <p class="summary-label">Tamamlanan</p>
+                        </div>
+                    </div>
+                    <div class="summary-card cancelled">
+                        <div class="summary-icon">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="summary-info">
+                            <p class="summary-value" id="cancelledAppointments">0</p>
+                            <p class="summary-label">İptal Edilen</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    if (window.firebase && window.auth && window.db) {
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                // Toplam müşteri sayısı
+                const customersSnapshot = await window.db.collection('customers').get();
+                document.getElementById('totalCustomers').textContent = customersSnapshot.size;
+
+                // Toplam berber sayısı
+                const barbersSnapshot = await window.db.collection('barbers').get();
+                document.getElementById('totalBarbers').textContent = barbersSnapshot.size;
+
+                // Randevu istatistikleri
+                const appointmentsSnapshot = await window.db.collection('appointments').get();
+                const appointments = appointmentsSnapshot.docs.map(doc => doc.data());
+
+                // Toplam randevu sayısı
+                document.getElementById('totalAppointments').textContent = appointmentsSnapshot.size;
+
+                // Randevu durumlarına göre sayılar
+                const stats = {
+                    pending: 0,
+                    confirmed: 0,
+                    completed: 0,
+                    cancelled: 0,
+                    totalRevenue: 0
+                };
+
+                appointments.forEach(appointment => {
+                    // Durum sayıları
+                    if (stats.hasOwnProperty(appointment.status)) {
+                        stats[appointment.status]++;
+                    }
+
+                    // Toplam kazanç (tamamlanan ve onaylanan randevular için)
+                    if (['completed', 'confirmed'].includes(appointment.status) && appointment.services) {
+                        appointment.services.forEach(service => {
+                            stats.totalRevenue += service.price || 0;
+                        });
+                    }
+                });
+
+                // İstatistikleri güncelle
+                document.getElementById('pendingAppointments').textContent = stats.pending;
+                document.getElementById('confirmedAppointments').textContent = stats.confirmed;
+                document.getElementById('completedAppointments').textContent = stats.completed;
+                document.getElementById('cancelledAppointments').textContent = stats.cancelled;
+                document.getElementById('totalRevenue').textContent = '₺' + stats.totalRevenue.toLocaleString('tr-TR');
+
+            } catch (error) {
+                console.error('İstatistikler yüklenirken hata:', error);
+                showToast('İstatistikler yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Toast mesajı göster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await checkFirebaseServices();
+                
+                // Auth durumunu kontrol et
+                window.auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        if (user.email === 'admin@berberotomasyon.com') {
+                            await loadStats();
+                        } else {
+                            window.location.href = 'login.html';
+                        }
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                });
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Sayfa yüklenirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+    </script>
+
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-card {
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .summary-card.pending {
+            background: rgba(241, 196, 15, 0.1);
+        }
+
+        .summary-card.confirmed {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .summary-card.completed {
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .summary-card.cancelled {
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .pending .summary-icon {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .confirmed .summary-icon {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .completed .summary-icon {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .cancelled .summary-icon {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .summary-info {
+            flex: 1;
+        }
+
+        .summary-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html> 

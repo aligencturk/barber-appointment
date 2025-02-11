@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevu Al - BarberApp</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/new-appointment.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Config -->
+    <script src="../js/config/firebase.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-left">
+                <a href="/customer/dashboard.html" class="logo">
+                    <i class="fas fa-cut"></i>
+                    BarberApp
+                </a>
+            </div>
+
+            <div class="header-right">
+                <div class="user-menu">
+                    <a href="/customer/new-appointment.html" class="nav-link active">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Yeni Randevu</span>
+                    </a>
+                    <a href="/customer/appointments.html" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Randevularım</span>
+                    </a>
+                    <a href="/customer/favorites.html" class="nav-link">
+                        <i class="fas fa-heart"></i>
+                        <span>Favorilerim</span>
+                    </a>
+                    <a href="#" onclick="logout()" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Çıkış Yap</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="appointment-container">
+        <!-- Berber Seçim Bölümü -->
+        <section class="appointment-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>Berber Seçimi</h2>
+                    <p class="section-subtitle">Size en uygun berberi seçin</p>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Berber ara...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="button" class="filter-btn active" data-filter="nearest">
+                    <i class="fas fa-location-dot"></i>
+                    En Yakın
+                </button>
+                <button type="button" class="filter-btn" data-filter="popular">
+                    <i class="fas fa-star"></i>
+                    Popüler
+                </button>
+                <button type="button" class="filter-btn" data-filter="favorites">
+                    <i class="fas fa-heart"></i>
+                    Favoriler
+                </button>
+            </div>
+
+            <div id="barbersGrid" class="barbers-grid"></div>
+        </section>
+
+        <!-- Randevu Formu -->
+        <section class="appointment-section" id="appointmentForm" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>Randevu Bilgileri</h2>
+                    <p class="section-subtitle" id="selectedBarberName"></p>
+                </div>
+                <button class="btn-back" onclick="showBarberSelection()">
+                    <i class="fas fa-arrow-left"></i>
+                    Berber Seçimine Dön
+                </button>
+            </div>
+
+            <form class="appointment-form" onsubmit="handleSubmit(event)">
+                <div class="form-grid">
+                    <!-- Kişisel Bilgiler -->
+                    <div class="form-group">
+                        <label for="fullName">
+                            <i class="fas fa-user"></i>
+                            Ad Soyad
+                        </label>
+                        <div class="input-with-icon">
+                            <input type="text" id="fullName" name="fullName" placeholder="Adınız ve soyadınız" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="fas fa-phone"></i>
+                            Telefon
+                        </label>
+                        <div class="input-with-icon">
+                            <input type="tel" id="phone" name="phone" placeholder="5XX XXX XX XX" required>
+                        </div>
+                    </div>
+
+                    <!-- Hizmet Seçimi -->
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-list-check"></i>
+                            Hizmet Seçimi
+                        </label>
+                        <div id="servicesGrid" class="services-grid"></div>
+                        <div id="appointmentSummary" class="selected-services-summary"></div>
+                    </div>
+
+                    <!-- Tarih ve Saat Seçimi -->
+                    <div class="form-group">
+                        <label for="appointmentDate">
+                            <i class="fas fa-calendar"></i>
+                            Randevu Tarihi
+                        </label>
+                        <div class="input-with-icon">
+                            <input type="date" id="appointmentDate" name="appointmentDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="time-slots-header" onclick="toggleTimeSlots()">
+                            <label>
+                                <i class="fas fa-clock"></i>
+                                Randevu Saati
+                            </label>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div id="timeSlots" class="time-slots-wrapper" style="display: none;"></div>
+                    </div>
+
+                    <!-- Notlar -->
+                    <div class="form-group full-width">
+                        <label for="notes">
+                            <i class="fas fa-note-sticky"></i>
+                            Notlar (Opsiyonel)
+                        </label>
+                        <textarea id="notes" name="notes" placeholder="Berberinize iletmek istediğiniz notları buraya yazabilirsiniz..." rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Butonu -->
+                <button type="submit" id="submitButton" class="submit-btn">
+                    <i class="fas fa-calendar-check"></i>
+                    Randevu Oluştur
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Toast Mesaj -->
+    <div id="toast" class="toast"></div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- App Scripts -->
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/customer/new-appointment.js"></script>
+</body>
+</html> 

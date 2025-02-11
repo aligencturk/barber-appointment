@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Kullanıcı kimlik doğrulaması kontrolü
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Berberler koleksiyonu kuralları
+    match /barbers/{barberId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == barberId;
+      
+      // Berber hizmetleri
+      match /services/{serviceId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && request.auth.uid == barberId;
+      }
+    }
+    
+    // Randevular koleksiyonu kuralları
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.customerId || 
+        request.auth.uid == resource.data.barberId
+      );
+    }
+    
+    // Müşteriler koleksiyonu kuralları
+    match /customers/{customerId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == customerId;
+    }
+    
+    // Hizmetler koleksiyonu kuralları
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && exists(/databases/$(database)/documents/barbers/$(request.auth.uid));
+    }
+  }
+} 

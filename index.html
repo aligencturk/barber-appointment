@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberApp - Online Berber Randevu Sistemi</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <nav class="nav">
+                <div class="nav-menu">
+                    <a href="/" class="logo">
+                        <i class="fas fa-cut"></i>
+                        BarberApp
+                    </a>
+                    
+                    <!-- Misafir Butonları -->
+                    <div class="nav-buttons" id="guestButtons">
+                        <a href="/customer/login.html" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Müşteri Girişi
+                        </a>
+                        <a href="/barber/login.html" class="btn btn-secondary">
+                            <i class="fas fa-cut"></i>
+                            Berber Girişi
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle">
+                                <i class="fas fa-user-plus"></i>
+                                Kayıt Ol
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="/customer/register.html" class="dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    Müşteri Kaydı
+                                </a>
+                                <a href="/barber/register.html" class="dropdown-item">
+                                    <i class="fas fa-store"></i>
+                                    İşletme Kaydı
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kullanıcı Menüsü -->
+                    <div class="user-menu" id="customerMenu" style="display: none;">
+                        <div class="user-info">
+                            <img src="/assets/default-avatar.png" alt="Profil" class="user-avatar">
+                            <span id="userName">Kullanıcı</span>
+                        </div>
+                        <div class="nav-links">
+                            <a href="/customer/new-appointment.html"><i class="fas fa-calendar-plus"></i> Randevu Al</a>
+                            <a href="/customer/appointments.html"><i class="fas fa-calendar"></i> Randevularım</a>
+                            <a href="/customer/favorites.html"><i class="fas fa-heart"></i> Favoriler</a>
+                            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="hero-content">
+                <h1>Geleneksel Berberlik Sanatı,<br>Modern Teknoloji ile Buluşuyor!</h1>
+                <p>Modern teknoloji ile geleneksel berberlik sanatını buluşturuyoruz.<br>
+                   Siz de ayrıcalıklı hizmetlerimizden faydalanın!</p>
+                <div class="hero-buttons">
+                    <a href="/customer/register.html" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Hemen Başla
+                        <span class="btn-description">Randevunuzu hemen oluşturun</span>
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        <i class="fas fa-compass"></i>
+                        Keşfet
+                        <span class="btn-description">Hizmetlerimizi ve fırsatlarımızı inceleyin</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Neden BarberApp?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Kolay Randevu</h3>
+                    <p>7/24 dilediğiniz zaman, saniyeler içinde en yakın berbere randevu alın.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Yakınınızdaki Berberler</h3>
+                    <p>Konumunuza en yakın, en iyi berberleri keşfedin ve kolayca ulaşın.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-star"></i>
+                    <h3>Kaliteli Hizmet</h3>
+                    <p>Deneyimli ve uzman berberlerimizden profesyonel hizmet alın.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-percent"></i>
+                    <h3>Özel Fırsatlar</h3>
+                    <p>Sadece uygulamamıza özel kampanya ve indirimlerden yararlanın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Nasıl Çalışır?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Hesap Oluşturun</h3>
+                    <p>Hızlıca ücretsiz hesabınızı oluşturun ve berberleri keşfetmeye başlayın.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Berberinizi Seçin</h3>
+                    <p>Puanları ve yorumları inceleyin, size en uygun berberi seçin.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Randevunuzu Alın</h3>
+                    <p>Size uygun tarih ve saati seçin, tek tıkla randevunuzu oluşturun.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ayrıcalıklı Hizmetlerden Yararlanın</h2>
+            <p>Geleneksel berberlik sanatını modern teknoloji ile buluşturan BarberApp'e katılın!</p>
+            <div class="cta-buttons">
+                <a href="/customer/register.html" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Müşteri Hesabı Oluştur
+                </a>
+                <a href="/barber/register.html" class="btn btn-secondary">
+                    <i class="fas fa-store"></i>
+                    İşletme Kaydı Oluştur
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <i class="fas fa-cut"></i>
+                        BarberApp
+                    </a>
+                    <p>Modern berberlik deneyimi</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Hızlı Bağlantılar</h4>
+                    <a href="/customer/login.html">Giriş Yap</a>
+                    <a href="/customer/register.html">Kayıt Ol</a>
+                    <a href="#features">Özellikler</a>
+                    <a href="#how-it-works">Nasıl Çalışır?</a>
+                </div>
+                <div class="footer-contact">
+                    <h4>İletişim</h4>
+                    <a href="mailto:info@barberapp.com">
+                        <i class="fas fa-envelope"></i>
+                        info@barberapp.com
+                    </a>
+                    <a href="tel:+902121234567">
+                        <i class="fas fa-phone"></i>
+                        0212 123 45 67
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BarberApp. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config ve Servisler -->
+    <script src="/js/config/firebase.js"></script>
+    <script src="/js/services/auth.service.js"></script>
+    <script src="/js/services/settings.service.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/js/landing.js"></script>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+</body>
+</html> 

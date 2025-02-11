@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcılar - Admin Paneli</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/users.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item active" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Kullanıcı Yönetimi</h1>
+                    <p>Müşteri ve berber hesaplarını görüntüle ve yönet</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddUserModal()">
+                        <i class="fas fa-plus"></i>
+                        Yeni Kullanıcı Ekle
+                    </button>
+                </div>
+            </header>
+
+            <!-- Users Container -->
+            <div class="users-container">
+                <!-- Search and Filter -->
+                <div class="card mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="search-box">
+                            <input type="text" class="form-control" id="searchUser" placeholder="Kullanıcı ara...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="filter-box">
+                            <select class="form-control" id="userFilter">
+                                <option value="all">Tüm Kullanıcılar</option>
+                                <option value="customers">Müşteriler</option>
+                                <option value="barbers">Berberler</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ad Soyad</th>
+                                <th>E-posta</th>
+                                <th>Telefon</th>
+                                <th>Rol</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="6" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Kullanıcılar yükleniyor...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Yeni Kullanıcı Ekle</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label for="userRole">Kullanıcı Rolü</label>
+                        <select id="userRole" class="form-control" required>
+                            <option value="customer">Müşteri</option>
+                            <option value="barber">Berber</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">Ad Soyad</label>
+                        <input type="text" id="userName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">E-posta</label>
+                        <input type="email" id="userEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">Telefon</label>
+                        <input type="tel" id="userPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="d-flex align-items-center gap-2">
+                            <input type="checkbox" id="userStatus" checked>
+                            <span>Aktif</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                            <i class="fas fa-times"></i>
+                            İptal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    console.log(`Firebase servisleri kontrol ediliyor... (${attempts}/${maxAttempts})`);
+
+                    if (window.firebase && window.auth && window.db) {
+                        console.log('Firebase servisleri başarıyla yüklendi');
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // Kullanıcıları yükle
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Kullanıcılar yükleniyor...</span>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const [customers, barbers] = await Promise.all([
+                    window.db.collection('customers').get(),
+                    window.db.collection('barbers').get()
+                ]);
+
+                if (customers.empty && barbers.empty) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="no-data">Henüz kullanıcı bulunmuyor</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                let html = '';
+
+                // Müşterileri listele
+                customers.forEach(doc => {
+                    const user = doc.data();
+                    html += createUserRow(doc.id, user, 'customer');
+                });
+
+                // Berberleri listele
+                barbers.forEach(doc => {
+                    const user = doc.data();
+                    html += createUserRow(doc.id, user, 'barber');
+                });
+
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Kullanıcılar yüklenirken hata:', error);
+                showToast('Kullanıcılar yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Kullanıcı satırı oluştur
+        function createUserRow(id, user, role) {
+            return `
+                <tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone || '-'}</td>
+                    <td>
+                        <span class="badge ${role === 'barber' ? 'badge-primary' : 'badge-secondary'}">
+                            ${role === 'barber' ? 'Berber' : 'Müşteri'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${user.status ? 'badge-success' : 'badge-danger'}">
+                            ${user.status ? 'Aktif' : 'Pasif'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-icon" onclick="editUser('${id}', '${role}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-icon" onclick="deleteUser('${id}', '${role}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Modal işlemleri
+        function showAddUserModal() {
+            document.getElementById('modalTitle').textContent = 'Yeni Kullanıcı Ekle';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Form submit
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const data = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                phone: document.getElementById('userPhone').value,
+                status: document.getElementById('userStatus').checked,
+                updatedAt: new Date()
+            };
+
+            const role = document.getElementById('userRole').value;
+            const collection = role === 'barber' ? 'barbers' : 'customers';
+
+            try {
+                if (userId) {
+                    await window.db.collection(collection).doc(userId).update(data);
+                    showToast('Kullanıcı başarıyla güncellendi', 'success');
+                } else {
+                    data.createdAt = new Date();
+                    await window.db.collection(collection).add(data);
+                    showToast('Kullanıcı başarıyla eklendi', 'success');
+                }
+
+                closeModal();
+                await loadUsers();
+            } catch (error) {
+                console.error('Kullanıcı kaydedilirken hata:', error);
+                showToast('Kullanıcı kaydedilirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Toast mesajı
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await checkFirebaseServices();
+                await loadUsers();
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Sayfa yüklenirken bir hata oluştu', 'error');
+            }
+        });
+    </script>
+
+    <style>
+        /* Users Container */
+        .users-container {
+            padding: 1rem 0;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Filter Box */
+        .filter-box {
+            width: 200px;
+        }
+
+        /* Table Actions */
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+        }
+
+        .badge-secondary {
+            background: rgba(52, 73, 94, 0.1);
+            color: #34495e;
+        }
+
+        .badge-success {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .badge-danger {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Loading */
+        td.loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        td.loading i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        /* No Data */
+        td.no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+    </style>
+</body>
+</html> 

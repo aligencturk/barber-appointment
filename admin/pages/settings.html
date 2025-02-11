@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayarlar - Admin Paneli</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJTSURBVFhH7ZY9aBRBFMf/e7u3l7vE5L6zEIxEwU60EGysrAQLwUYQBBELGxsLwUoQxEbBwkIsBAsLwcLGwkIsBAsLwUKwiEVAMQkxH3e7t7PzeW/2Qi6XD93dxCr5wcDOzr6Z/7w3+2YWaKLJf4ErbYxpj8lUdzXU7QYqJQxVkLYWBjVrHXKhRv1xbM6GWp+WkFNhGHZYY9pFQEp0ZBjHXWkc71Yqe0Gtc56Qc0KpXZzzXVxrxlhbFEW9YRTNBmG4wDhfDhV7Lqw9xKKYgONHmGXXfN+/kHPdEd/z9luu2+GrIFCBDhQXgbUxU2xFKXVDGzNpjFBa6wgqEjIVxvGQNvq2tfauZOxsyvMOc8ftcD2v03HdVsdxWriU3BhjS8kVxXEtVGpeaf1JKvWeSzlTq9W+hmE4xYV4Yqy9xKQ8nU6lDqQcpyuVTu9Oe143Z6ydMcY454xzIYS1VjHGlBBiQWv9O1DqR6jUvLX2O2NsVim1whhblFJ+iJVaUUo9dR1nPO15p9Kp1P6U63ZnPK/D87xWx3HSnHPOGWOEkCilVFEUzWutPwdKfVJKTQohXnIhHhHGxhxrbwkpz2VSqQOZdHpvxvd7Xdft4Jy3EGIYpZQxxpZDpT5qrT9Ya6c55++I4xBiNwkh+qSUw1rrm0qpe0KICSnlKyHEGyHEJBfiuZTyvhDiLmHsDmHsDmXsNnOcG5kgGKVxPEKUusKsvcyFGOZCnBBCHCOMdRPG2hhjGd6k+YfwL/kL1Qd0E9QeZLUAAAAASUVORK5CYII=">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item active" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Sistem Ayarları</h1>
+                    <p>Sistem ayarlarını yapılandır</p>
+                </div>
+                <div class="header-actions">
+                    <div class="admin-info">
+                        <span class="admin-name">Admin</span>
+                        <span class="admin-email">admin@berberotomasyon.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Bakım Modu</h2>
+                        <p>Sistemi bakım moduna al</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="switch">
+                                <input type="checkbox" id="maintenanceMode">
+                                <span class="slider"></span>
+                            </label>
+                            <span class="switch-label">Bakım Modu</span>
+                        </div>
+                        <div class="form-group" id="maintenanceMessageGroup" style="display: none;">
+                            <label for="maintenanceMessage">Bakım Mesajı</label>
+                            <textarea id="maintenanceMessage" rows="3" placeholder="Bakım sırasında gösterilecek mesaj">Sistem bakımda. Lütfen daha sonra tekrar deneyin.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bildirim Gönderme Kartı -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Bildirim Gönder</h2>
+                        <p>Kullanıcılara bildirim gönder</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="notificationForm">
+                            <div class="form-group">
+                                <label for="notificationTarget">Hedef Kitle</label>
+                                <select id="notificationTarget" class="form-control" required>
+                                    <option value="all">Tüm Kullanıcılar</option>
+                                    <option value="customers">Müşteriler</option>
+                                    <option value="barbers">Berberler</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="notificationTitle">Bildirim Başlığı</label>
+                                <input type="text" id="notificationTitle" class="form-control" required placeholder="Bildirim başlığını girin">
+                            </div>
+                            <div class="form-group">
+                                <label for="notificationMessage">Bildirim Mesajı</label>
+                                <textarea id="notificationMessage" class="form-control" rows="3" required placeholder="Bildirim mesajını girin"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Bildirimi Gönder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase ve Servisler -->
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/settings.service.js"></script>
+    <script src="../js/services/notification.service.js"></script>
+
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    console.log(`Firebase servisleri kontrol ediliyor... (${attempts}/${maxAttempts})`);
+
+                    if (window.firebase && window.auth && window.db) {
+                        console.log('Firebase servisleri başarıyla yüklendi');
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // Sayfa yüklendiğinde Firebase servislerini kontrol et
+        window.addEventListener('load', async () => {
+            try {
+                await checkFirebaseServices();
+            } catch (error) {
+                console.error('Firebase başlatma hatası:', error);
+            }
+        });
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Aktif sekmeyi işaretle
+                const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+                document.querySelector(`[data-page="${currentPage}"]`)?.classList.add('active');
+
+                // Mevcut ayarları yükle
+                const settings = await window.settingsService.getSettings();
+                if (settings) {
+                    document.getElementById('maintenanceMode').checked = settings.maintenanceMode;
+                    document.getElementById('maintenanceMessage').value = settings.maintenanceMessage;
+                    document.getElementById('maintenanceMessageGroup').style.display = settings.maintenanceMode ? 'block' : 'none';
+                }
+            } catch (error) {
+                console.error('Ayarlar yüklenirken hata:', error);
+                showToast('Ayarlar yüklenirken bir hata oluştu', 'error');
+            }
+        });
+
+        // Bakım modu değiştiğinde
+        document.getElementById('maintenanceMode').addEventListener('change', async (e) => {
+            try {
+                const enabled = e.target.checked;
+                const message = document.getElementById('maintenanceMessage').value;
+                
+                await window.settingsService.toggleMaintenanceMode(enabled, message);
+                
+                document.getElementById('maintenanceMessageGroup').style.display = enabled ? 'block' : 'none';
+                
+                showToast(`Bakım modu ${enabled ? 'aktif' : 'pasif'} hale getirildi`, 'success');
+            } catch (error) {
+                console.error('Bakım modu değiştirilirken hata:', error);
+                showToast(error.message, 'error');
+                e.target.checked = !e.target.checked; // Değişikliği geri al
+            }
+        });
+
+        // Bakım mesajı değiştiğinde
+        document.getElementById('maintenanceMessage').addEventListener('change', async (e) => {
+            try {
+                const enabled = document.getElementById('maintenanceMode').checked;
+                const message = e.target.value;
+                
+                await window.settingsService.toggleMaintenanceMode(enabled, message);
+                showToast('Bakım mesajı güncellendi', 'success');
+            } catch (error) {
+                console.error('Bakım mesajı güncellenirken hata:', error);
+                showToast(error.message, 'error');
+            }
+        });
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.authService.logout();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+
+        // Toast mesajı göster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Bildirim formu submit olayını dinle
+        document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const target = document.getElementById('notificationTarget').value;
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            
+            try {
+                await window.notificationService.sendNotification(target, title, message);
+                showToast('Bildirim başarıyla gönderildi', 'success');
+                
+                // Formu temizle
+                e.target.reset();
+            } catch (error) {
+                console.error('Bildirim gönderilirken hata:', error);
+                showToast(error.message, 'error');
+            }
+        });
+    </script>
+
+    <style>
+        .settings-container {
+            padding: 20px;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .card-header p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .switch-label {
+            margin-left: 70px;
+            line-height: 34px;
+            vertical-align: top;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,23 @@
+.cancellation-reason {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #fff3f3;
+    border-radius: 0.5rem;
+    border: 1px solid #ffcdd2;
+}
+
+.cancellation-reason i {
+    color: #dc3545;
+    margin-right: 0.5rem;
+}
+
+.cancellation-reason p {
+    margin: 0;
+    color: #dc3545;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.cancellation-reason strong {
+    font-weight: 600;
+} 

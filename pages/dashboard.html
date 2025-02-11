@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BarberApp</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/common.css">
+    <link rel="stylesheet" href="../css/pages/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase Config -->
+    <script src="../admin/js/config/firebase.js"></script>
+    
+    <!-- Services -->
+    <script src="../admin/js/services/auth.service.js"></script>
+    <script src="../admin/js/services/stats.service.js"></script>
+    <script src="../admin/js/services/activity.service.js"></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cut"></i>
+                    <span>Berber Yönetimi</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <a href="users.html" class="nav-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcılar</span>
+                </a>
+                <a href="appointments.html" class="nav-item" data-page="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Randevular</span>
+                </a>
+                <a href="services.html" class="nav-item" data-page="services">
+                    <i class="fas fa-cut"></i>
+                    <span>Hizmetler</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Yönetim Paneli</h1>
+                    <p>Sistem genel durumu ve istatistikler</p>
+                </div>
+                <div class="header-actions">
+                    <div class="admin-info">
+                        <span class="admin-name">Admin</span>
+                        <span class="admin-email">admin@berberotomasyon.com</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalUsers">0</h3>
+                        <p class="stat-label">Toplam Kullanıcı</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalBarbers">0</h3>
+                        <p class="stat-label">Toplam Berber</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="totalAppointments">0</h3>
+                        <p class="stat-label">Toplam Randevu</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="pendingAppointments">0</h3>
+                        <p class="stat-label">Bekleyen Randevu</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <section class="recent-activity">
+                <div class="section-header">
+                    <h2>Son Aktiviteler</h2>
+                    <button class="btn btn-primary" onclick="refreshActivities()">
+                        <i class="fas fa-sync"></i>
+                        Yenile
+                    </button>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Aktiviteler yükleniyor...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase'in yüklendiğini kontrol et
+        function checkFirebaseServices() {
+            return new Promise((resolve, reject) => {
+                const maxAttempts = 10;
+                let attempts = 0;
+
+                const check = () => {
+                    attempts++;
+                    console.log(`Firebase servisleri kontrol ediliyor... (${attempts}/${maxAttempts})`);
+
+                    if (window.firebase && window.auth && window.db) {
+                        console.log('Firebase servisleri başarıyla yüklendi');
+                        resolve(true);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(check, 500);
+                    } else {
+                        reject(new Error('Firebase servisleri yüklenemedi'));
+                    }
+                };
+
+                check();
+            });
+        }
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                const [users, barbers, appointments] = await Promise.all([
+                    window.db.collection('customers').get(),
+                    window.db.collection('barbers').get(),
+                    window.db.collection('appointments').get()
+                ]);
+
+                const pendingAppointments = appointments.docs.filter(doc => doc.data().status === 'pending');
+
+                document.getElementById('totalUsers').textContent = users.size;
+                document.getElementById('totalBarbers').textContent = barbers.size;
+                document.getElementById('totalAppointments').textContent = appointments.size;
+                document.getElementById('pendingAppointments').textContent = pendingAppointments.length;
+            } catch (error) {
+                console.error('İstatistikler yüklenirken hata:', error);
+                showToast('İstatistikler yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Son aktiviteleri yükle
+        async function loadActivities() {
+            try {
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Aktiviteler yükleniyor...</p></div>';
+
+                // Son 10 aktiviteyi timestamp'e göre sırala
+                const activitiesSnapshot = await window.db.collection('activities')
+                    .orderBy('createdAt', 'desc')
+                    .limit(10)
+                    .get();
+
+                if (activitiesSnapshot.empty) {
+                    activityList.innerHTML = '<div class="no-data">Henüz aktivite bulunmuyor</div>';
+                    return;
+                }
+
+                let html = '';
+                const activities = [];
+
+                // Aktiviteleri topla
+                for (const doc of activitiesSnapshot.docs) {
+                    const activity = doc.data();
+                    activities.push({
+                        ...activity,
+                        id: doc.id,
+                        date: activity.createdAt ? activity.createdAt.toDate() : new Date()
+                    });
+                }
+
+                // Aktiviteleri tarihe göre sırala
+                activities.sort((a, b) => b.date - a.date);
+
+                // HTML oluştur
+                activities.forEach(activity => {
+                    const date = activity.date.toLocaleString('tr-TR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    html += `
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas ${getActivityIcon(activity.type)}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">${activity.message || 'Bilinmeyen aktivite'}</p>
+                                <span class="activity-time">${date}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                activityList.innerHTML = html;
+
+                // Aktivite yoksa
+                if (activities.length === 0) {
+                    activityList.innerHTML = '<div class="no-data">Henüz aktivite bulunmuyor</div>';
+                }
+
+            } catch (error) {
+                console.error('Aktiviteler yüklenirken hata:', error);
+                activityList.innerHTML = '<div class="error-state">Aktiviteler yüklenirken bir hata oluştu</div>';
+                showToast('Aktiviteler yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Aktivite ikonlarını belirle
+        function getActivityIcon(type) {
+            switch (type) {
+                case 'appointment':
+                    return 'fa-calendar-check';
+                case 'user':
+                    return 'fa-user';
+                case 'barber':
+                    return 'fa-user-tie';
+                case 'service':
+                    return 'fa-cut';
+                case 'settings':
+                    return 'fa-cog';
+                case 'login':
+                    return 'fa-sign-in-alt';
+                case 'logout':
+                    return 'fa-sign-out-alt';
+                case 'update':
+                    return 'fa-sync';
+                case 'delete':
+                    return 'fa-trash';
+                case 'create':
+                    return 'fa-plus';
+                default:
+                    return 'fa-info-circle';
+            }
+        }
+
+        // Aktiviteleri yenile
+        function refreshActivities() {
+            loadActivities();
+            showToast('Aktiviteler yenilendi', 'success');
+        }
+
+        // Toast mesajı göster
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Çıkış yap
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await window.auth.signOut();
+                window.location.href = '../admin/pages/login.html';
+            } catch (error) {
+                console.error('Çıkış hatası:', error);
+                showToast('Çıkış yapılırken bir hata oluştu', 'error');
+            }
+        });
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', async () => {
+            try {
+                await checkFirebaseServices();
+                await loadStats();
+                await loadActivities();
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Sayfa yüklenirken bir hata oluştu', 'error');
+            }
+        });
+    </script>
+
+    <style>
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin: 0;
+        }
+
+        .stat-label {
+            color: #636e72;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin: 0;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: #e3f2fd;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            margin: 0;
+            color: #2d3436;
+            font-size: 0.9rem;
+        }
+
+        .activity-time {
+            display: block;
+            color: #636e72;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #636e72;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</body>
+</html> 

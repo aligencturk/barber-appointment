@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Girişi - Berber Otomasyonu</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/pages/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Admin Girişi</h1>
+                <p>Yönetim paneline erişmek için giriş yapın</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="email">E-posta</label>
+                    <input type="email" id="email" name="email" value="admin@berberotomasyon.com" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        Beni hatırla
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+            </form>
+
+            <div id="errorMessage" class="error-message" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase'in yüklendiğinden emin ol
+        window.addEventListener('load', () => {
+            if (!window.auth) {
+                console.error('Firebase henüz başlatılmadı');
+                showError('Sistem başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+        });
+
+        let isAuthCheckComplete = false;
+        let isLoginInProgress = false;
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mevcut oturumu kontrol et
+            if (window.auth) {
+                const unsubscribe = window.auth.onAuthStateChanged(async (user) => {
+                    if (!isAuthCheckComplete) {
+                        isAuthCheckComplete = true;
+                        const isAdmin = await window.checkAdmin(user);
+                        if (isAdmin && !isLoginInProgress) {
+                            window.location.href = '../pages/dashboard.html';
+                        }
+                    }
+                    unsubscribe();
+                });
+            }
+        });
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isLoginInProgress) return;
+            isLoginInProgress = true;
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            try {
+                // Butonu devre dışı bırak
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Giriş yapılıyor...';
+                
+                // Persistence ayarı
+                await window.auth.setPersistence(
+                    rememberMe 
+                        ? firebase.auth.Auth.Persistence.LOCAL 
+                        : firebase.auth.Auth.Persistence.SESSION
+                );
+                
+                // Giriş yap
+                const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Admin kontrolü
+                const isAdmin = await window.checkAdmin(user);
+                if (!isAdmin) {
+                    await window.auth.signOut();
+                    throw new Error('Bu hesap admin hesabı değil');
+                }
+                
+                // Başarılı giriş sonrası dashboard'a yönlendir
+                setTimeout(() => {
+                    window.location.href = '../pages/dashboard.html';
+                }, 500);
+                
+            } catch (error) {
+                console.error('Giriş hatası:', error);
+                let errorMessage = 'Giriş yapılırken bir hata oluştu';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Bu hesap devre dışı bırakılmış';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = 'Bu e-posta adresi ile kayıtlı hesap bulunamadı';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Hatalı şifre';
+                        break;
+                }
+                
+                showError(errorMessage);
+                
+                // Butonu tekrar aktif et
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Giriş Yap';
+                isLoginInProgress = false;
+            }
+        });
+
+        // Şifre göster/gizle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.classList.remove('fa-eye');
+                toggleBtn.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.classList.remove('fa-eye-slash');
+                toggleBtn.classList.add('fa-eye');
+            }
+        }
+
+        // Hata mesajı göster
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.querySelector('span').textContent = message;
+            errorMessage.style.display = 'flex';
+            
+            // 5 saniye sonra hata mesajını gizle
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

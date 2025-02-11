@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Component</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="Button.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Button Örnekleri</h2>
+        
+        <div class="example-section">
+            <h3>Temel Butonlar</h3>
+            <div class="button-group">
+                <button class="btn btn-primary">Primary Button</button>
+                <button class="btn btn-secondary">Secondary Button</button>
+                <button class="btn btn-outline">Outline Button</button>
+                <button class="btn btn-danger">Danger Button</button>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h3>Boyutlar</h3>
+            <div class="button-group">
+                <button class="btn btn-primary btn-small">Small</button>
+                <button class="btn btn-primary btn-medium">Medium</button>
+                <button class="btn btn-primary btn-large">Large</button>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h3>İkonlu Butonlar</h3>
+            <div class="button-group">
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Yeni Ekle
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-edit"></i>
+                    Düzenle
+                </button>
+                <button class="btn btn-danger">
+                    <i class="fas fa-trash"></i>
+                    Sil
+                </button>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h3>Durumlar</h3>
+            <div class="button-group">
+                <button class="btn btn-primary btn-loading">Loading</button>
+                <button class="btn btn-primary" disabled>Disabled</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import Button from './Button.js';
+
+        // JavaScript ile buton oluşturma örneği
+        const container = document.querySelector('.container');
+
+        // Primary button örneği
+        const primaryButton = new Button({
+            text: 'Programatik Button',
+            type: 'primary',
+            icon: 'fas fa-star',
+            onClick: () => alert('Button tıklandı!')
+        });
+
+        container.appendChild(primaryButton.render());
+
+        // Disabled button örneği
+        const disabledButton = new Button({
+            text: 'Disabled Button',
+            type: 'secondary',
+            disabled: true
+        });
+
+        container.appendChild(disabledButton.render());
+    </script>
+
+    <style>
+        .example-section {
+            margin: 2rem 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoş Geldiniz - BarberApp</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../js/config/firebase.js"></script>
+    
+    <!-- Services -->
+    <script src="../js/services/auth.service.js"></script>
+    <script src="../js/services/settings.service.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="profile-section">
+            <img src="../assets/default-avatar.png" alt="Profil" class="profile-image" id="userAvatar">
+            <h2 id="userName">Hoş Geldiniz</h2>
+        </div>
+        <nav class="nav-buttons">
+            <a href="new-appointment.html" class="nav-button">
+                <i class="fas fa-calendar-plus"></i>
+                Randevu Al
+            </a>
+            <a href="appointments.html" class="nav-button">
+                <i class="fas fa-calendar-check"></i>
+                Randevularım
+            </a>
+            <a href="favorites.html" class="nav-button">
+                <i class="fas fa-heart"></i>
+                Favorilerim
+            </a>
+            <button onclick="logout()" class="nav-button">
+                <i class="fas fa-sign-out-alt"></i>
+                Çıkış Yap
+            </button>
+        </nav>
+    </header>
+
+    <main class="main">
+        <section class="welcome-section">
+            <h1>Hoş Geldiniz</h1>
+            <p>Size nasıl yardımcı olabiliriz?</p>
+        </section>
+
+        <div class="quick-actions">
+            <div class="action-card">
+                <i class="fas fa-calendar-plus"></i>
+                <h3>Yeni Randevu</h3>
+                <p>Hemen yeni bir randevu oluşturun</p>
+                <a href="new-appointment.html" class="action-button">Randevu Al</a>
+            </div>
+
+            <div class="action-card">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Randevularım</h3>
+                <p>Mevcut randevularınızı görüntüleyin</p>
+                <a href="appointments.html" class="action-button">Görüntüle</a>
+            </div>
+
+            <div class="action-card">
+                <i class="fas fa-heart"></i>
+                <h3>Favorilerim</h3>
+                <p>Favori berberlerinizi yönetin</p>
+                <a href="favorites.html" class="action-button">Favorilerim</a>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Custom JS -->
+    <script src="js/maintenance.js"></script>
+    <script src="../js/customer/dashboard.js"></script>
+</body>
+</html> 

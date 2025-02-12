@@ -90,6 +90,6 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ## İletişim
 
-Proje Sahibi - [@github_kullanicisi](https://github.com/github_kullanicisi)
+Proje Sahibi - [@aligencturk](https://github.com/aligencturk)
 
 Proje Linki: [https://github.com/kullaniciadi/barber-appointment](https://github.com/kullaniciadi/barber-appointment) 
